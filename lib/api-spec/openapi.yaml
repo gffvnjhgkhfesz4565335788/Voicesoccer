@@ -1,0 +1,87 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: gemini-live
+    description: Gemini Live API token provisioning
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /gemini-live/token:
+    post:
+      operationId: createGeminiLiveToken
+      tags: [gemini-live]
+      summary: Create ephemeral token
+      description: Creates a short-lived ephemeral token for connecting to the Gemini Live API directly from the browser
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TokenRequest"
+      responses:
+        "200":
+          description: Ephemeral token created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "500":
+          description: Token creation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    TokenRequest:
+      type: object
+      properties:
+        agentId:
+          type: string
+          description: Identifier for the agent requesting the token
+    TokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: The ephemeral token to use for Gemini Live API WebSocket connection
+        expiresAt:
+          type: string
+          description: ISO 8601 expiry timestamp
+      required:
+        - token
+        - expiresAt
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
